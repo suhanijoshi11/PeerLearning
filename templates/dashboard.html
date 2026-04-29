@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dashboard">
+
+  <div class="dashboard-container">
+
+    <!-- LEFT SIDE -->
+    <div class="dash-left">
+
+      <h2>Hello {{ current_user.username }}</h2> 
+      <p>You are successfully logged in to your dashboard.</p> <br>
+
+      <h3>My Booked Slots</h3>
+
+      <!-- GRID -->
+      <div class="bookings-grid">
+        {% for booking in bookings %}
+          <div class="booking-card">
+
+            <h4>{{ booking.slot.subject }}</h4>
+
+            <p>{{ booking.slot.description }}</p>
+
+            <div class="info">
+              <span><b>Day:</b> {{ booking.slot.day }}</span>
+              <span><b>Time:</b> {{ booking.slot.time }}</span>
+
+               <p><strong>Creator Email:</strong> {{ booking.slot.creator.email }}</p>
+
+            </div>
+
+            <div class="status">
+              ✔ Confirmed
+            </div>
+
+            {% if not booking.slot.is_active %}
+
+
+    <form method="POST" action="{{ url_for('submit_review', booking_id=booking.id) }}">
+        
+        <label>Rating (1-5)</label>
+        <input type="number" name="rating" min="1" max="5" required>
+
+        <label>Review</label>
+        <textarea name="review" required></textarea>
+
+        <button type="submit" class="join-btn">Submit</button>
+    </form>
+
+{% endif %}
+
+          </div>
+        {% endfor %}
+      </div>
+
+      <h4 class="happy-text">Happy Learning!</h4>
+
+    </div>
+
+    <!-- RIGHT SIDE (SIDEBAR MENU) -->
+<div class="dash-right">
+
+  <div class="slot-card" style="position: sticky; top: 20px;">
+
+    <h3>Quick Menu</h3>
+
+    <a href="{{ url_for('profile') }}" class="logout-btn">Profile Management</a>
+
+    <a href="{{ url_for('messages') }}" class="logout-btn">Messages</a>
+
+    <a href="{{ url_for('notifications') }}" class="logout-btn">Notifications</a>
+
+    <a href="{{ url_for('my_slots') }}" class="logout-btn">My Slots</a>
+
+    <a href="{{ url_for('home') }}" class="logout-btn">Home</a>
+
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+
+  </div>
+
+</div>
+
+  </div>
+
+</section>
+
+{% endblock %}

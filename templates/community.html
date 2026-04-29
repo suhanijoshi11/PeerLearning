@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Ym4UML6MOnmglK67C65i9D0qS5W8Tnx6Z89U6u6B6u..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script>
+
+function react(postId, type) {
+
+  console.log("Clicked", postId, type); // DEBUG
+
+  fetch("/api/react", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      post_id: postId,
+      reaction: type
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    console.log("Response:", data); // DEBUG
+
+    document.getElementById(`agree-${postId}`).innerText = data.agree;
+    document.getElementById(`disagree-${postId}`).innerText = data.disagree;
+
+  })
+  .catch(err => console.log("Error:", err));
+
+}
+
+</script>
+
+<div style="max-width:1200px; margin:auto; padding:40px; font-family:Arial, sans-serif;">
+
+  <!-- HEADER -->
+  <div style="text-align:center; margin-bottom:30px;">
+    <h2 style="font-size:32px; margin-bottom:8px;">Student Community</h2>
+    <p style="color:gray; font-size:16px;">
+      Share your doubts, help others, and learn together.
+    </p><br>
+    <a href="{{ url_for('analytics_page') }}" class="join-btn" style="margin-bottom:20px; display:inline-block;">
+  📊 View Trending Analysis
+</a>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div style="display:flex; gap:25px; align-items:flex-start;">
+
+    <!-- LEFT: FEED -->
+    <div style="flex:2;">
+
+      {% for post in posts %}
+
+      <div class="slot-card" style="
+          margin-bottom:20px;
+          padding:20px;
+          border-radius:16px;
+          background:#fff;
+          box-shadow:0 6px 18px rgba(0,0,0,0.08);
+      ">
+
+        <h3 style="margin-bottom:8px;">{{ post.title }}</h3>
+
+        {% if post.image %}
+        <img src="{{ url_for('static', filename='uploads/' + post.image) }}" id="post-img">
+        {% endif %}
+
+        <p style="color:#444;">{{ post.description }}</p>
+
+        <p style="font-size:13px; color:#777;">
+          <b>Subject:</b> {{ post.subject }}
+        </p>
+
+        <small style="color:#999;">
+          Posted by {{ post.user.username }}
+        </small><br>
+
+        <!-- ACTIONS -->
+        <button class="join-btn" onclick="react({{ post.id }}, 'agree')">
+  👍 Agree (<span id="agree-{{ post.id }}">0</span>)
+</button><br>
+
+<button class="join-btn" onclick="react({{ post.id }}, 'disagree')">
+  👎 Disagree (<span id="disagree-{{ post.id }}">0</span>)
+</button><br>
+        <!-- COMMENT -->
+        <div style="margin-top:10px;">
+          <form method="POST" action="/comment/{{ post.id }}" style="display:flex; gap:10px;">
+            <input type="text" name="comment"
+                   placeholder="Write solution..."
+                   required
+                   style="flex:1; padding:10px; border-radius:10px; border:1px solid #ddd;">
+            <button class="join-btn">Comment</button>
+          </form>
+        </div>
+
+        {% if post.user_id == current_user.id %}
+        <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}"
+              style="margin-top:10px; text-align:right;">
+          <button type="submit" class="join-btn" style="background: rosybrown;">
+            Delete Post
+          </button>
+        </form>
+
+        <div style="margin-top:10px;">
+
+  {% for comment in comments_map.get(post.id, []) %}
+    
+    <div style="
+      padding:8px 12px;
+      background:#f5f5f5;
+      border-radius:10px;
+      margin-bottom:6px;
+      font-size:14px;
+    ">
+      <b>{{ comment.user.username }}:</b> {{ comment.comment }}
+    </div>
+
+  {% else %}
+    
+    <p style="color:gray; font-size:13px;">
+      No comments yet
+    </p>
+
+  {% endfor %}
+
+</div>
+        {% endif %}
+
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+    <!-- RIGHT: CREATE POST SIDEBAR -->
+    <div style="flex:1; position:sticky; top:20px;">
+
+      <div class="slot-card" style="
+          padding:20px;
+          border-radius:16px;
+          background:#fafafa;
+          box-shadow:0 4px 12px rgba(0,0,0,0.06);
+      ">
+
+        <h3 style="margin-bottom:15px;">Create a Post</h3>
+
+        <form method="POST" enctype="multipart/form-data"
+              style="display:flex; flex-direction:column; gap:12px;">
+
+          <input type="text" name="title" placeholder="Problem title"
+                 style="padding:10px; border-radius:10px; border:1px solid #ddd;" required>
+            
+          <input type="text" name="subject" placeholder="Subject (e.g. Math, Physics)"
+       style="padding:10px; border-radius:10px; border:1px solid #ddd;" required>
+
+          <textarea name="description" placeholder="Describe your problem"
+                    style="padding:10px; border-radius:10px; border:1px solid #ddd; min-height:90px; resize:none;"
+                    required></textarea>
+
+          <input type="file" name="image">
+
+          <button type="submit" class="join-btn">
+            Post
+          </button>
+
+        </form>
+
+        <!-- COMMENT DISPLAY -->
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
