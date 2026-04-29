@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:1100px; margin:auto; padding:30px;">
+
+  <h2 style="font-size:30px; margin-bottom:10px;">
+    📊 Student Trend Analysis Dashboard
+  </h2>
+
+  <p style="color:gray; margin-bottom:20px;">
+    Based on likes, reactions, and community activity
+  </p>
+
+  <!-- BIG CHART CARD -->
+  <div style="
+    background:#fff;
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.1);
+  ">
+
+    <canvas id="chart" style="height:400px;"></canvas>
+
+  </div>
+
+  <!-- SUGGESTIONS -->
+  <div id="suggestions" style="
+    margin-top:25px;
+    padding:20px;
+    background:#fafafa;
+    border-radius:15px;
+  ">
+    <h3>💡 Recommended Sessions</h3>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+fetch("/api/analytics")
+.then(res => res.json())
+.then(data => {
+
+  // sort for better insights
+  data.sort((a, b) => b.score - a.score);
+
+  const labels = data.map(d => d.subject);
+  const values = data.map(d => d.score);
+
+  // 🎯 BIG BAR CHART
+  new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Popularity Score (Likes + Engagement)",
+        data: values,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // 💡 SMART SUGGESTIONS
+  let suggestionBox = document.getElementById("suggestions");
+
+  if (data.length === 0) {
+    suggestionBox.innerHTML += "<p>No data yet</p>";
+    return;
+  }
+
+  let top = data[0];
+
+  suggestionBox.innerHTML += `
+    <div style="margin-top:10px;">
+      🔥 <b>Most trending topic:</b> ${top.subject}
+    </div>
+
+    <div style="margin-top:10px;">
+      👉 You should create a session on <b>${top.subject}</b>
+    </div>
+  `;
+
+  if (data.length > 1) {
+
+    suggestionBox.innerHTML += `
+      <div style="margin-top:10px;">
+        📚 Also trending:
+        <b>${data[1].subject}</b>, <b>${data[2]?.subject || ""}</b>
+      </div>
+    `;
+  }
+
+});
+
+</script>
+
+{% endblock %}

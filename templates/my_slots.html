@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="padding:40px;">
+
+  <h2>My Created Slots</h2> <br>
+
+  {% for slot in slots %}
+    <div class="slot-card">
+      <h3>{{ slot.subject }}</h3>
+      <p>{{ slot.name }}</p>
+      <p>{{ slot.date }} | {{ slot.time }}</p>
+
+      <a href="{{ url_for('slot_detail', slot_id=slot.id) }}" class="join-btn">
+        View Attendees
+      </a>
+    </div>
+  {% endfor %}
+
+</div>
+
+{% endblock %}

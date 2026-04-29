@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<section class="login-form" style="min-height: auto; padding-top: 60px;">
+  <form method="POST" action="" style="max-width: 600px;">
+    <h2 style="margin-bottom: 30px;">Create a Teaching Slot</h2>
+    
+    {{ form.hidden_tag() }}
+    
+    <div>
+      {{ form.name(placeholder="Name of Tutor") }}
+    </div>
+    
+    <div>
+      {{ form.subject(placeholder="Subject") }}
+    </div>
+    
+    <div>
+      {{ form.topic(placeholder="Topic") }}
+    </div>
+    
+    <div>
+      {{ form.description(placeholder="Description") }}
+    </div>
+    
+    <div style="display: flex; gap: 20px;">
+      <div style="flex: 1;">
+        <label style="font-size: 14px; font-weight: 500; margin-bottom: 5px; display: block;">Date</label>
+        {{ form.date(type="date") }}
+      </div>
+      <div style="flex: 1;">
+        <label style="font-size: 14px; font-weight: 500; margin-bottom: 5px; display: block;">Time</label>
+        {{ form.time(type="time") }}
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 20px; margin-top: 10px;">
+      <div style="flex: 1;">
+        {{ form.duration(placeholder="Duration (minutes)") }}
+      </div>
+      <div style="flex: 1;">
+        {{ form.seats(placeholder="Max Students") }}
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      {{ form.submit() }}
+    </div>
+  </form>
+</section>
+
+{% if slots %}
+<section style="padding: 40px 10%;">
+  <h2 style="margin-bottom: 30px; font-size: 32px;">Available Slots</h2>
+  <div class="slots-container">
+    {% for slot in slots %}
+        <div class="slot-card">
+            <h3>{{ slot[0] }} - {{ slot[1] }}</h3>
+            <p>{{ slot[2] }} | {{ slot[3] }}</p>
+            <p>{{ slot[4] }} mins | Seats: {{ slot[5] }}</p>
+        </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
