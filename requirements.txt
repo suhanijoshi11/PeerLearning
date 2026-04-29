@@ -1,9 +1,6 @@
-
+flask
+flask_sqlalchemy
+flask_login
+flask_wtf
+flask_bcrypt
 gunicorn
-Flask==3.0.3
-Flask-SQLAlchemy==3.1.1
-Flask-Login==0.6.3
-Flask-WTF==1.2.1
-Flask-Bcrypt==1.0.1
-WTForms==3.1.2
-Werkzeug==3.0.3
