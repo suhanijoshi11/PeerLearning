@@ -25,6 +25,13 @@ app.config['SECRET_KEY'] = 'secretkey'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'test.db')
+
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "connect_args": {"check_same_thread": False}
+}
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
@@ -63,7 +70,7 @@ class Slot(db.Model):
     date = db.Column(db.String(50))
     seats = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    creator = db.relationship('User', backref='created.slots')
+    creator = db.relationship('User', backref='created_slots')
     is_active = db.Column(db.Boolean, default=True)
 
 class Booking(db.Model):
@@ -216,20 +223,12 @@ def home():
     if time:
         filters.append(Slot.time == time)
 
-    # OR CONDITION
     if filters:
-        slots = Slot.query.filter(or_(*filters)).all()
-    else:
-        slots = Slot.query.all()
-
-    if filters:
-        slots = Slot.query.filter(or_(*filters), Slot.is_active == True).all()
+        slots = Slot.query.filter(*filters, Slot.is_active == True).all()
     else:
         slots = Slot.query.filter_by(is_active=True).all()
 
     return render_template("home.html", slots=slots)
-
-
 # REGISTER
 
 @app.route("/register", methods=["GET", "POST"])
@@ -885,8 +884,13 @@ def chat(user_id):
 
     return render_template("chat.html", other_user=other_user, messages=messages)
 
+@app.before_request
+def init_db():
+    db.create_all()
+
+@app.errorhandler(500)
+def error(e):
+    return f"ERROR: {str(e)}", 500
+    
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        print("✅ Fresh DB created")
     app.run(debug=True)
